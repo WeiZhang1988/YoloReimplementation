@@ -1,2 +1,2 @@
 # YoloReimplementation
-personal yolo practice
+private yolo practice

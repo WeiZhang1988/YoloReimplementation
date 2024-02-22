@@ -3,28 +3,37 @@ import torch
 import torchvision
 
 def filter_box(output, min_scale, max_scale):
+  # output   [n, 4]
+  # w------> [n]
+  # h------> [n]
+  # keep---> [n]
+  # return-> [k, 4] k depends on keep
   w = output[:, 2] - output[:, 0]
   h = output[:, 3] - output[:, 1]
   keep = (w * h > min_scale * min_scale) & (w * h < max_scale * max_scale)
   return output[keep]
 
 def bboxes_iou(bboxes_a, bboxes_b, xyxy=True):
+  # bboxes_a  [n, 4]
+  # bboxes_b  [n, 4]
+  # top_left  [n, n, 2]
+  # bot_right [n, n, 2]
   if bboxes_a.shape[1] != 4 or bboxes_b.shape[1] != 4:
     raise IndexError
   if xyxy:
-    top_left     = torch.max(bboxes_a[:,None,:2], bboxes_b[:,:2])
-    bottom_right = torch.min(bboxes_a[:,None,2:], bboxes_b[:,2:])
+    top_left  = torch.max(bboxes_a[:,None,:2], bboxes_b[:,:2])
+    bot_right = torch.min(bboxes_a[:,None,2:], bboxes_b[:,2:])
     area_a = torch.prod(bboxes_a[:,2:]-bboxes_a[:,:2], dim=1)
     area_b = torch.prod(bboxes_b[:,2:]-bboxes_b[:,:2], dim=1)
   else:
-    top_left     = torch.max((bboxes_a[:,None,:2]-bboxes_a[:,None,2:]/2),
-                             (bboxes_b[:,:2]-bboxes_b[:,2:]/2))
-    bottom_right = torch.min((bboxes_a[:,None,:2]+bboxes_a[:,None,2:]/2),
-                             (bboxes_b[:,:2]+bboxes_b[:,2:]/2))
+    top_left  = torch.max((bboxes_a[:,None,:2]-bboxes_a[:,None,2:]/2),
+                          (bboxes_b[:,:2]-bboxes_b[:,2:]/2))
+    bot_right = torch.min((bboxes_a[:,None,:2]+bboxes_a[:,None,2:]/2),
+                          (bboxes_b[:,:2]+bboxes_b[:,2:]/2))
     area_a = torch.prod(bboxes_a[:,2:], dim=1)
     area_b = torch.prod(bboxes_b[:,2:], dim=1)
-  en = (top_left < bottom_right).type(top_left.type()).prod(dim=2)
-  area_i = torch.prod(bottom_right-top_left, dim=2) * en
+  en = (top_left < bot_right).type(top_left.type()).prod(dim=2)
+  area_i = torch.prod(bot_right-top_left, dim=2) * en
   return area_i / (area_a[:,None] + area_b - area_i)
 
 def matrix_iou(a, b):

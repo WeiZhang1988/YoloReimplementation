@@ -3,94 +3,97 @@ import torch.nn as nn
 from network_blocks import BaseConv, DWConv, SPPBottleneck, ResLayer, CSPLayer, Focus
 
 class Darknet(nn.Module):
-    # number of blocks from dark2 to dark5.
-    depth2blocks = {21: [1, 2, 2, 1], 53: [2, 8, 8, 4]}
-
-    def __init__(self,
-                 in_channels=3,
-                 stem_out_channels=32,
-                 depth=53,
-                 out_features=["stem", "dark2", "dark3", "dark4", "dark5"]):
-      super().__init__()
-      assert out_features, "output features of Darknet cannot be empty"
-      self.out_features = out_features
-      self.stem = nn.Sequential(BaseConv(in_channels, 
-                                         stem_out_channels, 
-                                         kernel_size=3, 
-                                         stride=1, 
-                                         act="lrelu"),
-                                *self.make_group_layer(stem_out_channels, 
-                                                       num_blocks=1, 
-                                                       stride=2))
-      num_blocks = Darknet.depth2blocks[depth]
-      self.dark2 = nn.Sequential(*self.make_group_layer(stem_out_channels*2, 
-                                                        num_blocks=num_blocks[0], 
-                                                        stride=2))
-      self.dark3 = nn.Sequential(*self.make_group_layer(stem_out_channels*4, 
-                                                        num_blocks=num_blocks[1], 
-                                                        stride=2))
-      self.dark4 = nn.Sequential(*self.make_group_layer(stem_out_channels*8, 
-                                                        num_blocks=num_blocks[2], 
-                                                        stride=2))
-      self.dark5 = nn.Sequential(*self.make_group_layer(stem_out_channels*16, 
-                                                        num_blocks=num_blocks[3], 
-                                                        stride=2),
-                                 *self.make_spp_block(stem_out_channels*32, 
-                                                      stem_out_channels*16, 
-                                                      stem_out_channels*32))
-
-    def make_group_layer(self, in_channels, num_blocks, stride=1):
-      return [BaseConv(in_channels, 
-                       in_channels*2, 
-                       kernel_size=3, 
-                       stride=stride, 
-                       act="lrelu"),
-              *[(ResLayer(in_channels*2)) for _ in range(num_blocks)]]
-
-    def make_spp_block(self, in_channels, out_channels, hidden_channels):
-      m = nn.Sequential(*[BaseConv(in_channels, 
-                                   out_channels, 
-                                   kernel_size=1, 
-                                   stride=1, 
-                                   act="lrelu"),
-                          BaseConv(out_channels, 
-                                   hidden_channels, 
-                                   kernel_size=3, 
-                                   stride=1, 
-                                   act="lrelu"),
-                          SPPBottleneck(in_channels=hidden_channels,
-                                        out_channels=out_channels,
-                                        act="lrelu"),
-                          BaseConv(out_channels, 
-                                   hidden_channels, 
-                                   kernel_size=3, 
-                                   stride=1, 
-                                   act="lrelu"),
-                          BaseConv(hidden_channels, 
-                                   out_channels, 
-                                   kernel_size=1, 
-                                   stride=1, 
-                                   act="lrelu"),])
-      return m
-    def forward(self, x):
-      # x       [..., in_channels,          height,    width]
-      # stem -> [..., 2*stem_out_channels,  height/2,  width/2]
-      # dark2-> [..., 4*stem_out_channels,  height/4,  width/4]
-      # dark3-> [..., 8*stem_out_channels,  height/8,  width/8]
-      # dark4-> [..., 16*stem_out_channels, height/16, width/16]
-      # dark5-> [..., 16*stem_out_channels, height/32, width/32]
-      outputs = {}
-      x = self.stem(x)
-      outputs["stem"] = x
-      x = self.dark2(x)
-      outputs["dark2"] = x
-      x = self.dark3(x)
-      outputs["dark3"] = x
-      x = self.dark4(x)
-      outputs["dark4"] = x
-      x = self.dark5(x)
-      outputs["dark5"] = x
-      return {k: v for k, v in outputs.items() if k in self.out_features}
+  # number of blocks from dark2 to dark5.
+  depth2blocks = {21: [1, 2, 2, 1], 53: [2, 8, 8, 4]}
+  def __init__(self,
+               in_channels=3,
+               stem_out_channels=32,
+               depth=53,
+               out_features=["stem", "dark2", "dark3", "dark4", "dark5"]):
+    super().__init__()
+    assert out_features, "output features of Darknet cannot be empty"
+    self.out_features = out_features
+    self.stem = nn.Sequential(BaseConv(in_channels, 
+                                       stem_out_channels, 
+                                       kernel_size=3, 
+                                       stride=1, 
+                                       act="lrelu"),
+                              *self.make_group_layer(stem_out_channels, 
+                                                     num_blocks=1, 
+                                                     stride=2))
+    num_blocks = Darknet.depth2blocks[depth]
+    self.dark2 = nn.Sequential(*self.make_group_layer(stem_out_channels*2, 
+                                                      num_blocks=num_blocks[0], 
+                                                      stride=2))
+    self.dark3 = nn.Sequential(*self.make_group_layer(stem_out_channels*4, 
+                                                      num_blocks=num_blocks[1], 
+                                                      stride=2))
+    self.dark4 = nn.Sequential(*self.make_group_layer(stem_out_channels*8, 
+                                                      num_blocks=num_blocks[2], 
+                                                      stride=2))
+    self.dark5 = nn.Sequential(*self.make_group_layer(stem_out_channels*16, 
+                                                      num_blocks=num_blocks[3], 
+                                                      stride=2),
+                               *self.make_spp_block(stem_out_channels*32, 
+                                                    stem_out_channels*16, 
+                                                    stem_out_channels*32))
+  def make_group_layer(self, 
+                       in_channels, 
+                       num_blocks, 
+                       stride=1):
+    return [BaseConv(in_channels, 
+                     in_channels*2, 
+                     kernel_size=3, 
+                     stride=stride, 
+                     act="lrelu"),
+            *[(ResLayer(in_channels*2)) for _ in range(num_blocks)]]
+  def make_spp_block(self, 
+                     in_channels, 
+                     out_channels, 
+                     hidden_channels):
+    m = nn.Sequential(*[BaseConv(in_channels, 
+                                 out_channels, 
+                                 kernel_size=1, 
+                                 stride=1, 
+                                 act="lrelu"),
+                        BaseConv(out_channels, 
+                                 hidden_channels, 
+                                 kernel_size=3, 
+                                 stride=1, 
+                                 act="lrelu"),
+                        SPPBottleneck(in_channels=hidden_channels,
+                                      out_channels=out_channels,
+                                      act="lrelu"),
+                        BaseConv(out_channels, 
+                                 hidden_channels, 
+                                 kernel_size=3, 
+                                 stride=1, 
+                                 act="lrelu"),
+                        BaseConv(hidden_channels, 
+                                 out_channels, 
+                                 kernel_size=1, 
+                                 stride=1, 
+                                 act="lrelu"),])
+    return m
+  def forward(self, x):
+    # x       [..., in_channels,          height,    width]
+    # stem -> [..., 2*stem_out_channels,  height/2,  width/2]
+    # dark2-> [..., 4*stem_out_channels,  height/4,  width/4]
+    # dark3-> [..., 8*stem_out_channels,  height/8,  width/8]
+    # dark4-> [..., 16*stem_out_channels, height/16, width/16]
+    # dark5-> [..., 16*stem_out_channels, height/32, width/32]
+    outputs = {}
+    x = self.stem(x)
+    outputs["stem"] = x
+    x = self.dark2(x)
+    outputs["dark2"] = x
+    x = self.dark3(x)
+    outputs["dark3"] = x
+    x = self.dark4(x)
+    outputs["dark4"] = x
+    x = self.dark5(x)
+    outputs["dark5"] = x
+    return {k: v for k, v in outputs.items() if k in self.out_features}
 
 class CSPDarknet(nn.Module):
   def __init__(self, 

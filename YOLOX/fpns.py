@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from darknet import Darknet, CSPDarknet
+from darknets import Darknet, CSPDarknet
 from network_blocks import BaseConv, DWConv, CSPLayer
 
 class FPN(nn.Module):

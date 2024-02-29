@@ -105,7 +105,7 @@ class Head(nn.Module):
       reg_feat   = reg_conv(reg_x)
       reg_output = self.reg_preds[k](reg_feat)
       obj_output = self.obj_preds[k](reg_feat)
-      output = torch.cat([reg_output, obj_output.sigmoid(), cls_output.sigmoid()], 1)
+      output = torch.cat([reg_output.sigmoid(), obj_output.sigmoid(), cls_output.sigmoid()], 1)
       output, grid = self.get_output_and_grid(output, k, stride_this_level, xin[0].type())
       x_shifts.append(grid[:, :, 0])
       y_shifts.append(grid[:, :, 1])

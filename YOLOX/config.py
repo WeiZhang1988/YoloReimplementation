@@ -1,12 +1,4 @@
-import os
 import torch
-import warnings
-warnings.filterwarnings("ignore")
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:32"
-torch.backends.cudnn.enabled = True
-torch.backends.cudnn.benchmark = True
-torch.backends.cudnn.deterministic=True
-torch.cuda.synchronize()
 
 DATASET = 'PASCAL_VOC'
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -21,10 +13,10 @@ NUM_EPOCHS = 100
 CONF_THRESHOLD = 0.05
 LOAD_MODEL = True
 SAVE_MODEL = True
-CHECKPOINT_FILE = "checkpoint.pth.tar"
-DIR_PREFIX = "YOLOX/"
-IMG_DIR = DIR_PREFIX + "data/images/"
-LABEL_DIR = DIR_PREFIX + "data/labels/"
+DIR_PREFIX = "./"
+CHECKPOINT_FILE = DIR_PREFIX + "model/checkpoint.pth.tar"
+IMG_DIR = DIR_PREFIX + "dataset/images/"
+LABEL_DIR = DIR_PREFIX + "dataset/labels/"
 
 PASCAL_CLASSES = [
     "aeroplane",

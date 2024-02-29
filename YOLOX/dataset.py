@@ -10,7 +10,7 @@ class YoloXDataset(torch.utils.data.Dataset):
   images: frameID.png
   labels: frameID.txt
   """
-  def __init__(self, img_dir='./data/images', label_dir='./data/labels', image_size=(640,640)):
+  def __init__(self, img_dir='./data/images', label_dir='./data/labels', image_size=(640,640), num=10000):
     super().__init__()
     self.image_size    = image_size
     self.img_dir       = img_dir
@@ -21,8 +21,8 @@ class YoloXDataset(torch.utils.data.Dataset):
     assert os.path.exists(label_dir), f"label directory {label_dir} does not exist"
     assert self.images_png, f'No images found'
     assert self.labels_txt, f'No labels found'
-    self.images = self.load_images(self.images_png[:2007])
-    self.labels = self.load_labels(self.labels_txt[:2007])
+    self.images = self.load_images(self.images_png[:min(num,2007)])
+    self.labels = self.load_labels(self.labels_txt[:min(num,2007)])
     assert len(self.images) == len(self.labels), "number of images must equal to number of labelstxt"
     self.num_samples = len(self.images)
   def __len__(self):
@@ -33,7 +33,7 @@ class YoloXDataset(torch.utils.data.Dataset):
     return (torch.from_numpy(np.array(imgs)).type(torch.float32), torch.from_numpy(np.array(labels)).type(torch.float32))
   def load_images(self, pathes):
     pathes.sort()
-    imgs = [np.array(Image.open(img_file).resize(self.image_size).convert('RGB')).transpose((2, 0, 1)) for img_file in pathes]
+    imgs = [np.array(Image.open(img_file).resize(self.image_size)).transpose((2, 0, 1)) for img_file in pathes]
     return imgs
   def load_labels(self, pathes):
     pathes.sort()

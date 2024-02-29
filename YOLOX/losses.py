@@ -70,8 +70,7 @@ class YoloXLoss(nn.Module):
                            labels,
                            outputs,
                            origin_preds,
-                           torch.float32,
-                           False)
+                           torch.float32)
 
   def get_losses(self, 
                  x_shifts,
@@ -80,8 +79,7 @@ class YoloXLoss(nn.Module):
                  labels,
                  outputs,
                  origin_preds,
-                 dtype,
-                 use_l1):
+                 dtype):
     outputs    = torch.cat(outputs, 1)
     bbox_preds = outputs[:, :, :4]   # [batch, height*width, 4]
     obj_preds  = outputs[:, :, 4:5]  # [batch, height*width, 1]

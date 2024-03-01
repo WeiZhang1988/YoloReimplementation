@@ -105,7 +105,7 @@ class Head(nn.Module):
       reg_feat   = reg_conv(reg_x)
       reg_output = self.reg_preds[k](reg_feat)
       obj_output = self.obj_preds[k](reg_feat)
-      output = torch.cat([reg_output.sigmoid(), obj_output.sigmoid(), cls_output.sigmoid()], 1)
+      output = torch.cat([reg_output, obj_output.sigmoid(), cls_output.sigmoid()], 1)
       output, grid = self.get_output_and_grid(output, k, stride_this_level, xin[0].type())
       x_shifts.append(grid[:, :, 0])
       y_shifts.append(grid[:, :, 1])
@@ -135,7 +135,7 @@ class Head(nn.Module):
         batch_size, height * width, -1
     )
     grid = grid.view(1, -1, 2)
-    output[..., :2] = (output[..., :2] + grid) * stride
+    output[..., :2] = (output[..., :2].sigmoid() + grid) * stride
     output[..., 2:4] = torch.exp(output[..., 2:4]) * stride
     return output, grid
 

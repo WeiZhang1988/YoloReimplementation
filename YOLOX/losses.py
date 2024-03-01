@@ -81,15 +81,15 @@ class YoloXLoss(nn.Module):
                  origin_preds,
                  dtype):
     outputs    = torch.cat(outputs, 1)
-    bbox_preds = outputs[:, :, :4]   # [batch, height*width, 4]
-    obj_preds  = outputs[:, :, 4:5]  # [batch, height*width, 1]
-    cls_preds  = outputs[:, :, 5:]   # [batch, height*width, n_cls]
+    bbox_preds = outputs[:, :, :4]   # [batch, height1*width1+height2*width2+height3*width3, 4]
+    obj_preds  = outputs[:, :, 4:5]  # [batch, height1*width1+height2*width2+height3*width3, 1]
+    cls_preds  = outputs[:, :, 5:]   # [batch, height1*width1+height2*width2+height3*width3, n_cls]
     num_labels = (labels.sum(dim=2) > 0).sum(dim=1)  # number of objects
     total_num_cells = outputs.shape[1]
-    x_shifts = torch.cat(x_shifts, 1)  # [1, height*width]
-    y_shifts = torch.cat(y_shifts, 1)  # [1, height*width]
-    expanded_strides = torch.cat(expanded_strides, 1) # [1, height*width]
-    origin_preds = torch.cat(origin_preds, 1)  # [1, height*width]
+    x_shifts = torch.cat(x_shifts, 1)  # [1, height1*width1+height2*width2+height3*width3]
+    y_shifts = torch.cat(y_shifts, 1)  # [1, height1*width1+height2*width2+height3*width3]
+    expanded_strides = torch.cat(expanded_strides, 1) # [1, height1*width1+height2*width2+height3*width3]
+    origin_preds = torch.cat(origin_preds, 1)  # [1, height1*width1+height2*width2+height3*width3]
     cls_targets = []
     reg_targets = []
     l1_targets  = []

@@ -274,10 +274,8 @@ class YoloXLoss(nn.Module):
     topk_ious, _ = torch.topk(pair_wise_ious, n_candidate_k, dim=1)
     dynamic_ks = torch.clamp(topk_ious.sum(1).int(), min=1)
     for gt_idx in range(num_gt):
-        _, pos_idx = torch.topk(
-            cost[gt_idx], k=dynamic_ks[gt_idx], largest=False
-        )
-        matching_matrix[gt_idx][pos_idx] = 1
+      _, pos_idx = torch.topk(cost[gt_idx], k=dynamic_ks[gt_idx], largest=False)
+      matching_matrix[gt_idx][pos_idx] = 1
     del topk_ious, dynamic_ks, pos_idx
     anchor_matching_gt = matching_matrix.sum(0)
     # deal with the case that one anchor matches multiple ground-truths

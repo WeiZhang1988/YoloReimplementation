@@ -60,7 +60,7 @@ class YoloXLoss(nn.Module):
     super().__init__()
     self.num_classes = num_classes
     self.l1_loss = nn.L1Loss(reduction="none")
-    self.bcewithlog_loss = nn.BCEWithLogitsLoss(reduction="none")
+    self.bcewithlog_loss = nn.BCELoss(reduction="none")
     self.iou_loss = IOUloss(reduction="none")
   def forward(self, preds, labels=None):
     outputs, x_shifts, y_shifts, expanded_strides, origin_preds = preds
@@ -280,17 +280,15 @@ class YoloXLoss(nn.Module):
     anchor_matching_gt = matching_matrix.sum(0)
     # deal with the case that one anchor matches multiple ground-truths
     if anchor_matching_gt.max() > 1:
-        multiple_match_mask = anchor_matching_gt > 1
-        _, cost_argmin = torch.min(cost[:, multiple_match_mask], dim=0)
-        matching_matrix[:, multiple_match_mask] *= 0
-        matching_matrix[cost_argmin, multiple_match_mask] = 1
+      multiple_match_mask = anchor_matching_gt > 1
+      _, cost_argmin = torch.min(cost[:, multiple_match_mask], dim=0)
+      matching_matrix[:, multiple_match_mask] *= 0
+      matching_matrix[cost_argmin, multiple_match_mask] = 1
     fg_mask_inboxes = anchor_matching_gt > 0
     num_fg = fg_mask_inboxes.sum().item()
     fg_mask[fg_mask.clone()] = fg_mask_inboxes
     matched_gt_inds = matching_matrix[:, fg_mask_inboxes].argmax(0)
     gt_matched_classes = gt_classes[matched_gt_inds]
-    pred_ious_this_matching = (matching_matrix * pair_wise_ious).sum(0)[
-        fg_mask_inboxes
-    ]
+    pred_ious_this_matching = (matching_matrix * pair_wise_ious).sum(0)[fg_mask_inboxes]
     return num_fg, gt_matched_classes, pred_ious_this_matching, matched_gt_inds
   

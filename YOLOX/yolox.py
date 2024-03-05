@@ -17,9 +17,6 @@ class YOLOX(nn.Module):
     self.backbone = backbone
     self.head = head
     self.num_classes = num_classes
-    self.l1_loss = nn.L1Loss(reduction="none")
-    self.bcewithlog_loss = nn.BCEWithLogitsLoss(reduction="none")
-    self.iou_loss = IOUloss(reduction="none")
   def forward(self, x):
     return self.head(self.backbone(x))
   def extract(self, preds, height,width):

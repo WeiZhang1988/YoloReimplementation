@@ -135,7 +135,7 @@ class Head(nn.Module):
         batch_size, height * width, -1
     )
     grid = grid.view(1, -1, 2)
-    output[..., :2] = (output[..., :2].sigmoid() + grid) * stride
+    output[..., :2] = (output[..., :2] + grid) * stride
     output[..., 2:4] = torch.exp(output[..., 2:4]) * stride
     return output, grid
 

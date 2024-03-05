@@ -2,19 +2,21 @@ import torch
 
 DATASET = 'PASCAL_VOC'
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "cpu"
 # seed_everything()  # If you want deterministic behavior
-NUM_WORKERS = 2
+NUM_WORKERS = 4
 BATCH_SIZE = 4
 IMAGE_SIZE = 416
 NUM_CLASSES = 20
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 WEIGHT_DECAY = 1e-4
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1000
 CONF_THRESHOLD = 0.05
-LOAD_MODEL = False
+LOAD_MODEL = True
 SAVE_MODEL = True
 DIR_PREFIX = "./"
 CHECKPOINT_FILE = DIR_PREFIX + "model/checkpoint.pth.tar"
+LOSS_FILE = DIR_PREFIX + "model/loss.pkl"
 IMG_DIR = DIR_PREFIX + "dataset/images/"
 LABEL_DIR = DIR_PREFIX + "dataset/labels/"
 

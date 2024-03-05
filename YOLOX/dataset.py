@@ -30,7 +30,7 @@ class YoloXDataset(torch.utils.data.Dataset):
   def __getitem__(self, index):
     imgs   = self.images[index].copy()
     labels = self.labels[index].copy()
-    return (torch.from_numpy(np.array(imgs)).type(torch.float32), torch.from_numpy(np.array(labels)).type(torch.float32))
+    return (torch.from_numpy(np.array(imgs)).type(torch.float32)/255.0, torch.from_numpy(np.array(labels)).type(torch.float32))
   def load_images(self, pathes):
     pathes.sort()
     imgs = [np.array(Image.open(img_file).resize(self.image_size)).transpose((2, 0, 1)) for img_file in pathes]

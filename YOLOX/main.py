@@ -53,6 +53,7 @@ def train():
       loss.backward()
       optimizer.step()
       mean_loss.append(loss.item())
+    scheduler.step()
     avg_loss = sum(mean_loss)/len(mean_loss)
     print(f"{epoch}th training epoch average loss: {avg_loss}")
     if avg_loss < avg_loss_pre_epoch and config.SAVE_MODEL:

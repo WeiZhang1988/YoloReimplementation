@@ -78,7 +78,7 @@ def eval():
       cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-  ONLY_EVAL = True
+  ONLY_EVAL = False
   if ONLY_EVAL:
     eval()
   else:

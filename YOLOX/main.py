@@ -66,13 +66,13 @@ def eval():
   optimizer = optim.Adam(yolox.parameters(),lr=config.LEARNING_RATE,weight_decay=config.WEIGHT_DECAY)
   origin_images = load_images()
   images = torch.tensor(origin_images,dtype=torch.float32).to(config.DEVICE)
-  outputs, _, _, _, _ = yolox(images)
-  bboxes, scores, cls = yolox.extract(outputs,config.IMAGE_SIZE,config.IMAGE_SIZE)
   if os.path.exists(config.CHECKPOINT_FILE):
     avg_loss = load_checkpoint(config.CHECKPOINT_FILE,config.LOSS_FILE,yolox,optimizer)  
+    outputs, _, _, _, _ = yolox(images)
+    bboxes, scores, cls = yolox.extract(outputs,config.IMAGE_SIZE,config.IMAGE_SIZE)
     for i, img in enumerate(origin_images):
       img = img.transpose(1,2,0)
-      res = visualize(img,bboxes[i], scores[i], cls[i], 0.5, config.PASCAL_CLASSES)
+      res = visualize(img, bboxes[i], scores[i], cls[i], 0.5, config.PASCAL_CLASSES)
       cv2.imshow(f"image_{i}",cv2.cvtColor(res, cv2.COLOR_BGR2RGB))
       cv2.waitKey(0)
       cv2.destroyAllWindows()

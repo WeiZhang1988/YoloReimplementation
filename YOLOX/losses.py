@@ -108,7 +108,7 @@ class YoloXLoss(nn.Module):
         fg_mask    = outputs.new_zeros(total_num_cells).bool()
       else:
         gt_bboxes_per_image    = labels[batch_idx, :num_gt, 1:5]
-        gt_classes             = labels[batch_idx, :num_gt, 0]
+        gt_classes             = labels[batch_idx, :num_gt, 0:1]
         bboxes_preds_per_image = bbox_preds[batch_idx]
         try:
           (gt_matched_classes,

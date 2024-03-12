@@ -23,13 +23,15 @@ class YOLOX(nn.Module):
     preds = torch.cat(preds,dim=1)
     preds[...,0:3:2] *= height
     preds[...,1:4:2] *= width
-    batched_preds_out = []
+    bbox_preds = []
+    obj_preds  = []
+    cls_preds  = []
     for items in preds:
-      batched_preds_out.append(non_max_suppression(items))
-    bbox_preds = torch.stack(batched_preds_out)[..., :4]   # [1, m, 4]
-    obj_preds  = torch.stack(batched_preds_out)[..., 4:5]  # [1, m, 1]
-    cls_preds  = torch.argmax(torch.stack(batched_preds_out)[..., 5:],dim=-1,keepdim=True)   # [batch, m, n_cls] -> [batch, m, 1]
-    return bbox_preds.cpu().numpy(), obj_preds.cpu().numpy(), cls_preds.cpu().numpy()
+      slected = non_max_suppression(items)
+      bbox_preds.append(slected[..., :4].cpu().numpy())
+      obj_preds.append(slected[..., 4:5].cpu().numpy())
+      cls_preds.append(torch.argmax(slected[..., 5:],dim=-1,keepdim=True).cpu().numpy())
+    return bbox_preds, obj_preds, cls_preds
 
 if __name__ == '__main__':
   num_class = 20

@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-def bboxes_iou(bboxes_a, bboxes_b, xyxy=True):
+def bboxes_iou(bboxes_a, bboxes_b, xyxy=False):
   # bboxes_a  [n, 4];    bboxes_b  [n, 4]
   # top_left  [n, n, 2]; bot_right [n, n, 2]
   # area_a    [n];       area_b    [n]
@@ -26,7 +26,7 @@ def bboxes_iou(bboxes_a, bboxes_b, xyxy=True):
   area_i = torch.prod(br-tl, dim=-1) * en
   return area_i / (area_a[:,None] + area_b - area_i + 1e-12)
 
-def matrix_iou(bboxes_a, bboxes_b, xyxy=True):
+def matrix_iou(bboxes_a, bboxes_b, xyxy=False):
   # bboxes_a  [n, 4];    bboxes_b  [n, 4]
   # top_left  [n, n, 2]; bot_right [n, n, 2]
   # area_a    [n];       area_b    [n]

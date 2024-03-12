@@ -4,6 +4,7 @@ import torch
 import config
 import numpy as np
 from PIL import Image
+from boxes import cxcywh2xyxy
 
 def save_checkpoint(state, loss, checkpoint='./model/model.pth.tar', loss_serial='./model/loss.pkl'):
   print("--> saving checkpoint")
@@ -24,3 +25,30 @@ def load_images(pathes = glob.glob('./dataset/images/*'), num=5, height=config.I
   pathes.sort()
   imgs = [np.array(Image.open(pathes[i]).resize((height, width))).transpose(2, 0, 1) for i in range(min(num,len(pathes)))]
   return imgs
+
+def load_labels(pathes = glob.glob('./dataset/labels/*'), num=5):
+  pathes.sort()
+  labels = []
+  for i in range(min(num,len(pathes))):
+    detects = []
+    with open(pathes[i]) as f:
+      lines=f.readlines()
+      for line in lines:
+        detects.append(np.fromstring(line, dtype=float, sep=' '))
+      detects = np.stack(detects)
+    labels.append(detects)
+  return labels
+
+def process_labels(labels,height=config.IMAGE_SIZE,width=config.IMAGE_SIZE):
+  bboxes    = []
+  scores    = []
+  cls       = []
+  cls_conf  = []
+  for label in labels:
+    label[:,1::2] *= height
+    label[:,2::2] *= width
+    bboxes.append(cxcywh2xyxy(label[:,1:]))
+    scores.append(np.ones(label.shape[0]))
+    cls.append(label[:,0:1])
+    cls_conf.append(np.ones(label.shape[0]))
+  return bboxes, scores, cls, cls_conf
